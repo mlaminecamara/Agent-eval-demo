@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: agent
+          POSTGRES_PASSWORD: agent
+          POSTGRES_DB: agent_eval
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agent -d agent_eval"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      # CI never uses real APIs: everything runs with the deterministic mock providers.
+      LLM_PROVIDER: mock
+      EMBEDDING_PROVIDER: mock
+      DATABASE_URL: postgresql://agent:agent@localhost:5432/agent_eval
+      # Integration tests fail (instead of skipping) if the database is unreachable.
+      RUN_INTEGRATION: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: uv sync --frozen
+      - name: Ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Mypy
+        run: uv run mypy
+      - name: Pytest (mock mode, including pgvector integration tests)
+        run: uv run pytest
+      - name: Ingest smoke test (mock embeddings into pgvector)
+        run: uv run python -m agent_eval.ingest --chunk-size 500 --overlap 50
+      # Added in milestone 5: eval smoke test in mock mode (make eval-mock)

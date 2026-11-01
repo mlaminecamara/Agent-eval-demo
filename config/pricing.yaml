@@ -1,0 +1,45 @@
+# USD per 1M tokens. Values are left null on purpose: fill them from the providers'
+# official pricing pages, set source + retrieved, and flip verified to true.
+# A real run refuses to start while a model it uses has a null price
+# (override with --allow-unknown-price, in which case cost is reported as "unknown").
+
+models:
+  gpt-5.4-mini-2026-03-17:
+    input_per_mtok: 0.75
+    output_per_mtok: 4.50
+    source: OpenAI model page for GPT-5.4 Mini (screenshot checked by the repo owner)
+    retrieved: 2026-11-01
+    verified: true
+  # Anthropic values copied from the Claude API reference bundled with Claude Code
+  # (model table cached 2026-10-06). Check against the official page before a real run.
+  claude-sonnet-5-5:
+    input_per_mtok: 2.00
+    output_per_mtok: 10.00
+    source: https://www.anthropic.com/pricing (via Claude API reference, cached 2026-10-06)
+    retrieved: 2026-11-01
+    verified: false
+  claude-haiku-5-5:
+    input_per_mtok: 0.10   # prompts up to 100K tokens
+    output_per_mtok: 0.50
+    source: https://www.anthropic.com/pricing (via Claude API reference, cached 2026-10-06)
+    retrieved: 2026-11-01
+    verified: false
+  text-embedding-3-small:
+    input_per_mtok: 0.02
+    output_per_mtok: 0
+    source: OpenAI model page for text-embedding-3-small (screenshot checked by the repo owner)
+    retrieved: 2026-11-01
+    verified: true
+  # Offline fakes: zero cost by definition.
+  mock-llm-v1:
+    input_per_mtok: 0
+    output_per_mtok: 0
+    source: n/a
+    retrieved: n/a
+    verified: true
+  mock-embed-v1:
+    input_per_mtok: 0
+    output_per_mtok: 0
+    source: n/a
+    retrieved: n/a
+    verified: true

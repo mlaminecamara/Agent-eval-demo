@@ -1,0 +1,42 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime output
+runs/
+logs/
+*.log
+
+# Eval raw run files (summary.md and the report inputs are committed)
+evals/results/*.json
+!evals/results/report_runs.json
+evals/results/raw/
+
+# Corpus working files (the source documents themselves are committed)
+data/corpus/.cache/
+data/processed/
+
+# Local model caches
+.cache/
+models/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

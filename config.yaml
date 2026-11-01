@@ -1,0 +1,61 @@
+# Default configuration. Environment variables override the keys noted below.
+# Eval configs in evals/configs/ (milestone 5+) override this file per experiment.
+
+llm:
+  provider: mock            # env: LLM_PROVIDER  (mock | openai | anthropic)
+  model: null               # env: LLM_MODEL; null -> provider default below
+  # Not sent when null. Current Anthropic models and OpenAI reasoning models (GPT-5 family)
+  # reject non-default sampling parameters, so it stays null for the default models.
+  temperature: null
+  max_output_tokens: 4096   # includes reasoning tokens on reasoning models
+  timeout_s: 60
+  # null = model default. OpenAI -> reasoning_effort, Anthropic -> output_config.effort.
+  effort: null
+  defaults:
+    openai: gpt-5.4-mini-2026-03-17   # pinned snapshot for reproducibility
+    anthropic: claude-sonnet-5-5
+    mock: mock-llm-v1
+
+judge:
+  provider: anthropic
+  model: claude-haiku-5-5
+
+embeddings:
+  provider: mock            # env: EMBEDDING_PROVIDER  (mock | openai)
+  model: null
+  defaults:
+    openai: text-embedding-3-small
+    mock: mock-embed-v1
+  dimensions:
+    text-embedding-3-small: 1536
+    mock-embed-v1: 256
+
+database:
+  url: postgresql://agent:agent@localhost:5432/agent_eval   # env: DATABASE_URL
+
+corpus:
+  dir: data/corpus
+  manifest: data/corpus/manifest.yaml
+  adversarial_dir: data/adversarial
+
+retrieval:
+  store: pgvector           # env: VECTOR_STORE  (pgvector | memory)
+  chunk_size: 500           # tokens (tiktoken cl100k_base)
+  chunk_overlap: 50         # tokens
+  top_k: 5
+  candidate_k: 20           # candidates fetched before reranking
+  rerank: false             # env: RERANK
+  reranker_model: BAAI/bge-reranker-v2-m3
+  hnsw:
+    m: 16
+    ef_construction: 64
+    ef_search: 40
+
+cost_guard:
+  max_llm_calls: 500        # env: MAX_LLM_CALLS
+  max_total_tokens: 2000000 # env: MAX_TOTAL_TOKENS
+  pricing_file: config/pricing.yaml
+
+logging:
+  level: INFO               # env: LOG_LEVEL
+  runs_dir: runs
