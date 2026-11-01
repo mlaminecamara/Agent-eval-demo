@@ -1,0 +1,137 @@
+{
+  "status": "draft",
+  "status_note": "Drafted from the corpus on 2026-11-01. ",
+  "as_of": "2026-11-01",
+  "entity_sizes": {
+    "GE": {
+      "label": "Grande entreprise",
+      "definition": "Effectif > 5 000 ou CA > 1,5 Mds € et total de bilan > 2 Mds €",
+      "source": {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (note 1 du tableau)"},
+      "verified": true
+    },
+    "ETI": {
+      "label": "Entreprise de taille intermédiaire",
+      "definition": "250 < effectif < 5 000 et CA < 1,5 Mds € ou total de bilan < 2 Mds €",
+      "source": {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (note 2 du tableau)"},
+      "verified": true
+    },
+    "PME": {
+      "label": "Petite et moyenne entreprise",
+      "definition": "10 < effectif < 250 + CA < 50 M € ou total de bilan < 43 M €",
+      "source": {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (note 4 du tableau)"},
+      "verified": true
+    },
+    "MICRO": {
+      "label": "Microentreprise",
+      "definition": "Effectif < 10 + CA < 2 M€ ou total de bilan < 2 M€",
+      "source": {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (note 3 du tableau)"},
+      "verified": true
+    }
+  },
+  "obligations": {
+    "reception": "Obligation de recevoir les factures sous format électronique (via une plateforme agréée)",
+    "emission": "Obligation d'émettre les factures sous format électronique (via une plateforme agréée)",
+    "e_reporting": "Obligation de transmettre les données de transaction (e-reporting)"
+  },
+  "deadlines": [
+    {
+      "entity_size": "GE", "obligation": "reception", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Depuis le 1 er septembre 2026, toutes les entreprises, quelles que soient leur taille et leur forme juridique, ont l'obligation de recevoir des factures sous format électronique"},
+        {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (tableau)", "quote": "Réception des factures ... 1er septembre 2026"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "ETI", "obligation": "reception", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Depuis le 1 er septembre 2026, toutes les entreprises, quelles que soient leur taille et leur forme juridique, ont l'obligation de recevoir des factures sous format électronique"},
+        {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (tableau)", "quote": "Réception des factures ... 1er septembre 2026"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "PME", "obligation": "reception", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Depuis le 1 er septembre 2026, toutes les entreprises, quelles que soient leur taille et leur forme juridique, ont l'obligation de recevoir des factures sous format électronique"},
+        {"doc_id": "fiche-3", "page": 1, "section": "1. La réception des factures électroniques", "quote": "Depuis le 1 er septembre 2026, votre entreprise doit être en mesure de recevoir des factures sous format électronique"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "MICRO", "obligation": "reception", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Depuis le 1 er septembre 2026, toutes les entreprises, quelles que soient leur taille et leur forme juridique, ont l'obligation de recevoir des factures sous format électronique"},
+        {"doc_id": "fiche-3", "page": 1, "section": "1. La réception des factures électroniques", "quote": "Depuis le 1 er septembre 2026, votre entreprise doit être en mesure de recevoir des factures sous format électronique"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "GE", "obligation": "emission", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Les grandes entreprises (GE) et les entreprises de taille intermédiaire (ETI) doivent également émettre toutes leurs factures sous format électronique."},
+        {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (tableau)", "quote": "Grandes entreprises (GE) ... Entreprises de taille intermédiaire (ETI) ... Émission des factures ... 1er septembre 2026"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "ETI", "obligation": "emission", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Les grandes entreprises (GE) et les entreprises de taille intermédiaire (ETI) doivent également émettre toutes leurs factures sous format électronique."},
+        {"doc_id": "fiche-1", "page": 1, "section": "Fiche 1 (tableau)", "quote": "Grandes entreprises (GE) ... Entreprises de taille intermédiaire (ETI) ... Émission des factures ... 1er septembre 2026"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "PME", "obligation": "emission", "date": "2027-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Les petites, moyennes et micro-entreprises seront, quant à elles tenues, d'émettre leurs factures au format électronique au plus tard le 1er septembre 2027."},
+        {"doc_id": "fiche-3", "page": 2, "section": "2. L'émission de factures électroniques", "quote": "Au plus tard le 1er septembre 2027: vous devez être en capacité d'adresser à vos clients des factures électroniques"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "MICRO", "obligation": "emission", "date": "2027-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 6, "section": "5.1", "quote": "Les petites, moyennes et micro-entreprises seront, quant à elles tenues, d'émettre leurs factures au format électronique au plus tard le 1er septembre 2027."},
+        {"doc_id": "fiche-1", "page": 3, "section": "Fiche 1", "quote": "Au 1er septembre 2027, votre entreprise ... devra elle-même être en mesure d'émettre des factures au format électronique."}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "GE", "obligation": "e_reporting", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 8, "section": "8.1", "quote": "La mise en place de la transmission des données de transaction (e-reporting) suit celle de la facturation électronique: depuis le 1er septembre 2026 pour les grandes entreprises et pour les établissements de taille intermédiaire"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "ETI", "obligation": "e_reporting", "date": "2026-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 8, "section": "8.1", "quote": "depuis le 1er septembre 2026 pour les grandes entreprises et pour les établissements de taille intermédiaire"}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "PME", "obligation": "e_reporting", "date": "2027-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 8, "section": "8.1", "quote": "et à partir du 1er septembre 2027 pour les micro, petites et moyennes entreprises."},
+        {"doc_id": "faq-fe", "page": 4, "section": "1.3", "quote": "L'entreprise pourra entrer distinctement dans le e-reporting dès lors qu'elle le fait au plus tard au 1er septembre 2027."}
+      ],
+      "verified": true
+    },
+    {
+      "entity_size": "MICRO", "obligation": "e_reporting", "date": "2027-09-01",
+      "sources": [
+        {"doc_id": "faq-fe", "page": 8, "section": "8.1", "quote": "et à partir du 1er septembre 2027 pour les micro, petites et moyennes entreprises."}
+      ],
+      "verified": true
+    }
+  ],
+  "notes": [
+    "Size is assessed per legal unit (SIREN); see FAQ question 1.1 (faq-fe) for how and when.",
+    "TPE/PME may opt in to e-invoicing before 1 September 2027; opting in does not change their e-reporting deadline (faq-fe, 1.3).",
+    "Micro-enterprises under the VAT franchise (article 293 B du CGI) are also subject to reception and emission (fiche-1, p. 2).",
+    "The original texts in the corpus (ordonnance 2021-1190, décret 2022-1299, version initiale) contain an earlier calendar that was amended; this table follows the current DGFiP documents."
+  ]
+}
