@@ -92,6 +92,12 @@ class PgVectorStore(VectorStore):
                 idx=sql.Identifier(f"{self.spec.table_name}_coll"), table=self.table
             )
         )
+        # Row-level security with no policies: on Supabase, tables in `public` are otherwise
+        # readable and writable through the REST API with the anon key. The table owner (the
+        # role this code connects with) bypasses RLS, so ingestion and search are unaffected.
+        conn.execute(
+            sql.SQL("ALTER TABLE {table} ENABLE ROW LEVEL SECURITY").format(table=self.table)
+        )
 
     def upsert(self, chunks: list[Chunk], vectors: list[list[float]]) -> None:
         if len(chunks) != len(vectors):

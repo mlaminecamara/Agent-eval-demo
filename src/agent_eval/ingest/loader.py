@@ -40,7 +40,8 @@ class Document:
 
 # FAQ-style numbered headings: "1.", "1.3", "8.1." followed by text. Kept short to avoid
 # treating numbered list items inside paragraphs as headings.
-_NUMBERED_HEADING = re.compile(r"^\d{1,2}(\.\d{1,2})*\.?\s+\S.{2,180}$")
+# The number must contain a dot ("1.", "1.3", "1.3.") so that "1 du CGI)" is not a heading.
+_NUMBERED_HEADING = re.compile(r"^\d{1,2}\.(\d{1,2}\.?)*\s+\S.{2,180}$")
 _FICHE_HEADING = re.compile(r"^(Fiche \d+|Bon à savoir|À retenir)\b", re.IGNORECASE)
 
 

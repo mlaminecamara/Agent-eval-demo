@@ -92,9 +92,17 @@ def _db_or_skip(dsn: str):
 
 @pytest.fixture
 def pg_store(mock_settings):
+    from dotenv import dotenv_values
+
+    from agent_eval.config import PROJECT_ROOT
     from agent_eval.retrieval.pgvector_store import PgVectorStore
 
-    dsn = os.environ.get("DATABASE_URL", mock_settings.database.url)
+    # Environment first (CI), then .env (local Supabase / Docker), then config.yaml.
+    dsn = (
+        os.environ.get("DATABASE_URL")
+        or dotenv_values(PROJECT_ROOT / ".env").get("DATABASE_URL")
+        or mock_settings.database.url
+    )
     _db_or_skip(dsn)
     # Unique model name -> unique table, so tests never touch real indexes.
     spec = IndexSpec(f"test-{uuid.uuid4().hex[:8]}", mock_settings.embeddings.dimension, 500, 50)
