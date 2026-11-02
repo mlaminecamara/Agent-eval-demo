@@ -1,21 +1,27 @@
 """Deterministic fake LLM for offline tests and CI.
 
-It follows fixed rules so that the agent loop, tool calls, tracing and metrics can be exercised
-end to end without an API key. Its answers say nothing about real model quality; every result
-produced with it is labelled provider=mock.
+It follows fixed rules so that the agent loops, tool calls, tracing and metrics can be
+exercised end to end without an API key. Its answers say nothing about real model quality;
+every result produced with it is labelled provider=mock.
 
-Rules (first match wins), applied to the conversation so far:
-1. Last message is a tool result -> final answer quoting the tool results.
-2. User question has no domain keyword -> refusal.
-3. Tools available -> call `search_docs` (or the first tool) with the question.
-4. Otherwise -> echo answer.
+Rules, applied to the conversation so far (the question is the first user message):
+1. No domain keyword in the question -> refusal starting with "HORS PÉRIMÈTRE".
+2. Tools offered -> the next tool in this fixed chain that applies and was not called yet:
+   a. search_docs(query=question)
+   b. get_deadline, if the question names an entity size and an obligation
+   c. calculate_date(diff), if the question contains an ISO date and asks for a number of
+      days, using the date returned by get_deadline
+3. Otherwise -> final answer quoting the tool results (dates and day counts first).
 """
 
 from __future__ import annotations
 
 import hashlib
+import json
 import math
+import re
 import unicodedata
+from typing import Any
 
 from agent_eval.llm.base import LLMProvider, LLMResponse, Message, ToolCall, ToolSpec, Usage
 
@@ -32,24 +38,39 @@ DOMAIN_KEYWORDS = (
     "cii",
     "echeance",
     "obligation",
-    "entreprise",
     "pme",
     "eti",
     "micro",
     "annuaire",
     "emission",
+    "emettre",
     "reception",
+    "recevoir",
     "calendrier",
-    "date",
     "agree",
     "immatricul",
     "dgfip",
 )
 
+# Must start with agents.prompts.REFUSAL_MARKER (kept literal here to avoid an import cycle;
+# a test checks they match).
 REFUSAL_TEXT = (
-    "Je ne peux pas répondre à cette question : elle sort du périmètre de la réforme de la "
-    "facturation électronique couvert par mes sources."
+    "HORS PÉRIMÈTRE : je ne peux pas répondre à cette question, elle sort du périmètre de la "
+    "réforme de la facturation électronique couvert par mes sources."
 )
+
+_SIZES = (
+    ("GE", ("grande entreprise", "grandes entreprises")),
+    ("ETI", ("taille intermediaire", " eti")),
+    ("MICRO", ("micro", "auto-entrepreneur", "autoentrepreneur", "tpe")),
+    ("PME", ("pme", "petite", "moyenne")),
+)
+_OBLIGATIONS = (
+    ("e_reporting", ("e-reporting", "ereporting", "donnees de transaction")),
+    ("emission", ("emettre", "emission", "emet")),
+    ("reception", ("recevoir", "reception", "recoi")),
+)
+_ISO_DATE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
 
 
 def _normalize(text: str) -> str:
@@ -67,8 +88,68 @@ def is_in_domain(text: str) -> bool:
     return any(k in norm for k in DOMAIN_KEYWORDS)
 
 
+def _detect(norm: str, table: tuple[tuple[str, tuple[str, ...]], ...]) -> str | None:
+    padded = f" {norm} "
+    return next((key for key, words in table if any(w in padded for w in words)), None)
+
+
+def _called(messages: list[Message]) -> dict[str, str]:
+    """tool name -> content of its (last) result."""
+    names = {tc.id: tc.name for m in messages for tc in m.tool_calls}
+    return {names.get(m.tool_call_id or "", "?"): m.content for m in messages if m.role == "tool"}
+
+
+def _final_answer(results: dict[str, str]) -> str:
+    facts: list[str] = []
+    for name, content in results.items():
+        try:
+            data = json.loads(content)
+        except json.JSONDecodeError:
+            data = None
+        if isinstance(data, dict):
+            for key in ("date", "result_date", "days_between"):
+                if key in data:
+                    facts.append(f"{name}: {key}={data[key]}")
+        else:
+            facts.append(f"{name}: {content[:300]}")
+    return "Réponse (mock) fondée sur les sources [S1] : " + " | ".join(facts)
+
+
 class MockLLM(LLMProvider):
     name = "mock"
+
+    def _next_call(
+        self, question: str, messages: list[Message], tools: list[ToolSpec]
+    ) -> tuple[str, dict[str, Any]] | None:
+        available = {t.name for t in tools}
+        done = _called(messages)
+        norm = _normalize(question)
+        if "search_docs" in available and "search_docs" not in done:
+            return "search_docs", {"query": question[:500], "top_k": None}
+        size, obligation = _detect(norm, _SIZES), _detect(norm, _OBLIGATIONS)
+        if "get_deadline" in available and "get_deadline" not in done and size and obligation:
+            return "get_deadline", {"entity_size": size, "obligation": obligation}
+        iso = _ISO_DATE.search(question)
+        if (
+            "calculate_date" in available
+            and "calculate_date" not in done
+            and iso
+            and "jour" in norm
+            and "get_deadline" in done
+        ):
+            try:
+                deadline = json.loads(done["get_deadline"]).get("date")
+            except json.JSONDecodeError:
+                deadline = None
+            if deadline:
+                return "calculate_date", {
+                    "operation": "diff",
+                    "start_date": iso.group(1),
+                    "days": None,
+                    "months": None,
+                    "end_date": deadline,
+                }
+        return None
 
     def _complete(
         self,
@@ -77,23 +158,23 @@ class MockLLM(LLMProvider):
         tools: list[ToolSpec],
         max_output_tokens: int,
     ) -> LLMResponse:
-        question = next((m.content for m in reversed(messages) if m.role == "user"), "")
+        question = next((m.content for m in messages if m.role == "user"), "")
         tool_calls: list[ToolCall] = []
 
-        if messages and messages[-1].role == "tool":
-            results = [m.content for m in messages if m.role == "tool"]
-            text = "Réponse (mock) fondée sur les sources : " + " | ".join(r[:300] for r in results)
-        elif not is_in_domain(question):
+        if not is_in_domain(question):
             text = REFUSAL_TEXT
-        elif tools:
-            tool = next((t for t in tools if t.name == "search_docs"), tools[0])
-            call_id = (
-                "call_" + hashlib.sha1(f"{len(messages)}:{question}".encode()).hexdigest()[:12]
-            )
-            tool_calls = [ToolCall(id=call_id, name=tool.name, arguments={"query": question})]
-            text = ""
         else:
-            text = f"Réponse (mock) : {question}"
+            nxt = self._next_call(question, messages, tools) if tools else None
+            if nxt is None:
+                text = _final_answer(_called(messages))
+            else:
+                name, args = nxt
+                call_id = (
+                    "call_"
+                    + hashlib.sha1(f"{len(messages)}:{name}:{question}".encode()).hexdigest()[:12]
+                )
+                tool_calls = [ToolCall(id=call_id, name=name, arguments=args)]
+                text = ""
 
         text = text[: max_output_tokens * 4]
         prompt_chars = len(system) + sum(len(m.content) for m in messages)

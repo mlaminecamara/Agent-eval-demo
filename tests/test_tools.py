@@ -103,7 +103,7 @@ def test_get_deadline_lookup(registry):
     assert r.ok
     payload = json.loads(r.content)
     assert payload["date"] == "2027-09-01"
-    assert payload["verified"] is False
+    assert isinstance(payload["verified"], bool)  # state comes from the reviewed file
     assert {s["doc_id"] for s in payload["sources"]} >= {"faq-fe"}
 
 

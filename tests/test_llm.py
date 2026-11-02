@@ -24,7 +24,7 @@ def test_mock_calls_search_tool_for_in_domain_question(mock_settings):
     r = llm.complete("sys", [Message.user(q)], tools=[SEARCH])
     assert r.finish_reason == "tool_calls"
     assert r.tool_calls[0].name == "search_docs"
-    assert r.tool_calls[0].arguments == {"query": q}
+    assert r.tool_calls[0].arguments == {"query": q, "top_k": None}
     assert r.usage.input_tokens > 0
 
 

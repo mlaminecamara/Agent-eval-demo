@@ -51,6 +51,11 @@ retrieval:
     ef_construction: 64
     ef_search: 40
 
+agent:
+  max_iterations: 6         # model turns that may request tools before a final answer is forced
+  max_tool_result_chars: 6000
+  today: null               # reference date in the system prompt (YYYY-MM-DD); evals pin it
+
 cost_guard:
   max_llm_calls: 500        # env: MAX_LLM_CALLS
   max_total_tokens: 2000000 # env: MAX_TOTAL_TOKENS

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
+from datetime import date
 from pathlib import Path
 from typing import Any, Literal
 
@@ -90,6 +91,12 @@ class RetrievalConfig(BaseModel):
     hnsw: HNSWConfig = Field(default_factory=HNSWConfig)
 
 
+class AgentSettings(BaseModel):
+    max_iterations: int = 6
+    max_tool_result_chars: int = 6000
+    today: date | None = None  # reference date given to the agent; None = real today
+
+
 class CostGuardConfig(BaseModel):
     max_llm_calls: int = 500
     max_total_tokens: int = 2_000_000
@@ -108,6 +115,7 @@ class Settings(BaseModel):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     corpus: CorpusConfig = Field(default_factory=CorpusConfig)
     retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
+    agent: AgentSettings = Field(default_factory=AgentSettings)
     cost_guard: CostGuardConfig = Field(default_factory=CostGuardConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
 
