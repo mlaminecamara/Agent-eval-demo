@@ -40,6 +40,8 @@ class LLMConfig(BaseModel):
 class JudgeConfig(BaseModel):
     provider: LLMProviderName = "anthropic"
     model: str = "claude-haiku-5-5"
+    max_output_tokens: int = 2048
+    effort: str | None = "low"
 
 
 class EmbeddingConfig(BaseModel):

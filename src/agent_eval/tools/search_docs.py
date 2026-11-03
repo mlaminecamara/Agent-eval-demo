@@ -74,6 +74,7 @@ class SearchDocsTool(Tool[SearchDocsArgs]):
                     "url": c.url,
                     "score": round(hit.score, 4),
                     "collection": c.collection,
+                    "text": c.text,  # for the judge's groundedness check; dropped from results
                 }
             )
             pages = (

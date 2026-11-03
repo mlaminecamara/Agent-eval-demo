@@ -22,9 +22,8 @@ runs/
 logs/
 *.log
 
-# Eval raw run files (summary.md and the report inputs are committed)
-evals/results/*.json
-!evals/results/report_runs.json
+# Eval results: real runs (evals/results/<run_id>.json/.md) are committed; mock runs are not.
+evals/results/mock/
 evals/results/raw/
 
 # Corpus working files (the source documents themselves are committed)

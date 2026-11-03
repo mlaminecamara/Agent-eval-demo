@@ -11,8 +11,8 @@ help:
 	@echo "test       run the test suite (mock mode, no API key; DB tests skip if no DB)"
 	@echo "test-integration  pgvector tests only (needs make up)"
 	@echo "lint       ruff + mypy"
-	@echo "eval       real evaluation run (asks for cost confirmation) [milestone 5]"
-	@echo "eval-mock  offline evaluation run with fake LLM/embeddings  [milestone 5]"
+	@echo "eval       real evaluation run (asks for cost confirmation; ARGS=...)"
+	@echo "eval-mock  offline evaluation run with fake LLM/embeddings/judge"
 	@echo "compare    compare result files into evals/results/summary.md [milestone 7]"
 	@echo "report     inject the generated tables into README.md        [milestone 7]"
 	@echo "serve      run the FastAPI app                               [milestone 7]"
@@ -43,5 +43,13 @@ ingest:
 test-integration:
 	RUN_INTEGRATION=1 LLM_PROVIDER=mock EMBEDDING_PROVIDER=mock $(UV) run pytest -m integration
 
-eval eval-mock compare report serve:
+# Real run: prints the estimated cost and asks for confirmation. Extra flags via ARGS, e.g.
+#   make eval ARGS="--provider anthropic --chunk-size 1000 --overlap 100"
+eval:
+	$(UV) run python -m evals.run_eval $(ARGS)
+
+eval-mock:
+	$(UV) run python -m evals.run_eval --mock $(ARGS)
+
+compare report serve:
 	@echo "'make $@' is not implemented yet (see the milestone noted in 'make help')." && exit 1

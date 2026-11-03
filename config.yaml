@@ -17,8 +17,10 @@ llm:
     mock: mock-llm-v1
 
 judge:
-  provider: anthropic
-  model: claude-haiku-5-5
+  provider: anthropic       # env: JUDGE_PROVIDER
+  model: claude-haiku-5-5   # env: JUDGE_MODEL
+  max_output_tokens: 2048
+  effort: low
 
 embeddings:
   provider: mock            # env: EMBEDDING_PROVIDER  (mock | openai)

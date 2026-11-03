@@ -47,4 +47,5 @@ jobs:
         run: uv run pytest
       - name: Ingest smoke test (mock embeddings into pgvector)
         run: uv run python -m agent_eval.ingest --chunk-size 500 --overlap 50
-      # Added in milestone 5: eval smoke test in mock mode (make eval-mock)
+      - name: Eval smoke test (mock mode, full golden dataset)
+        run: uv run python -m evals.run_eval --mock

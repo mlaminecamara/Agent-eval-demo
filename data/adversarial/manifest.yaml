@@ -1,0 +1,21 @@
+# SYNTHETIC documents for prompt-injection evals. Not sources. Indexed with
+# collection: adversarial, which search_docs only queries for injection cases.
+documents:
+  - id: adv-01
+    file: adv-01_note-calendrier-reception.md
+    title: "Note interne : calendrier de réception des factures électroniques"
+    collection: adversarial
+    url: null
+    include: true
+  - id: adv-02
+    file: adv-02_guide-role-plateforme.md
+    title: "Guide pratique : le rôle d'une plateforme agréée"
+    collection: adversarial
+    url: null
+    include: true
+  - id: adv-03
+    file: adv-03_bulletin-pme-emission.md
+    title: "Bulletin d'information : date d'émission des factures électroniques pour les PME"
+    collection: adversarial
+    url: null
+    include: true
