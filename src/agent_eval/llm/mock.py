@@ -12,6 +12,8 @@ Rules, applied to the conversation so far (the question is the first user messag
    c. calculate_date(diff), if the question contains an ISO date and asks for a number of
       days, using the date returned by get_deadline
 3. Otherwise -> final answer quoting the tool results (dates and day counts first).
+When `submit_plan` is offered (Plan-and-Execute planner), the chain of rule 2 is returned as
+a plan. With tool_choice "none", rule 3 applies.
 """
 
 from __future__ import annotations
@@ -23,7 +25,15 @@ import re
 import unicodedata
 from typing import Any
 
-from agent_eval.llm.base import LLMProvider, LLMResponse, Message, ToolCall, ToolSpec, Usage
+from agent_eval.llm.base import (
+    LLMProvider,
+    LLMResponse,
+    Message,
+    ToolCall,
+    ToolChoice,
+    ToolSpec,
+    Usage,
+)
 
 DOMAIN_KEYWORDS = (
     "factur",
@@ -115,6 +125,17 @@ def _final_answer(results: dict[str, str]) -> str:
     return "Réponse (mock) fondée sur les sources [S1] : " + " | ".join(facts)
 
 
+def _plan(question: str) -> list[dict[str, str]]:
+    """The tool chain of rule 2, as a plan (for the Plan-and-Execute planner)."""
+    norm = _normalize(question)
+    steps = [{"tool": "search_docs", "goal": "chercher les passages pertinents"}]
+    if _detect(norm, _SIZES) and _detect(norm, _OBLIGATIONS):
+        steps.append({"tool": "get_deadline", "goal": "obtenir la date d'obligation"})
+        if _ISO_DATE.search(question) and "jour" in norm:
+            steps.append({"tool": "calculate_date", "goal": "compter les jours"})
+    return steps
+
+
 class MockLLM(LLMProvider):
     name = "mock"
 
@@ -124,6 +145,8 @@ class MockLLM(LLMProvider):
         available = {t.name for t in tools}
         done = _called(messages)
         norm = _normalize(question)
+        if "submit_plan" in available:
+            return "submit_plan", {"steps": _plan(question)}
         if "search_docs" in available and "search_docs" not in done:
             return "search_docs", {"query": question[:500], "top_k": None}
         size, obligation = _detect(norm, _SIZES), _detect(norm, _OBLIGATIONS)
@@ -157,6 +180,7 @@ class MockLLM(LLMProvider):
         messages: list[Message],
         tools: list[ToolSpec],
         max_output_tokens: int,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         question = next((m.content for m in messages if m.role == "user"), "")
         tool_calls: list[ToolCall] = []
@@ -164,7 +188,11 @@ class MockLLM(LLMProvider):
         if not is_in_domain(question):
             text = REFUSAL_TEXT
         else:
-            nxt = self._next_call(question, messages, tools) if tools else None
+            nxt = (
+                self._next_call(question, messages, tools)
+                if tools and tool_choice == "auto"
+                else None
+            )
             if nxt is None:
                 text = _final_answer(_called(messages))
             else:

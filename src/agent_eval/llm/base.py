@@ -15,6 +15,9 @@ from typing import Any, Literal
 
 Role = Literal["user", "assistant", "tool"]
 FinishReason = Literal["stop", "tool_calls", "length", "refusal", "error"]
+# "none": tools stay declared (a history with tool calls requires them on some APIs) but the
+# model must answer in text.
+ToolChoice = Literal["auto", "none"]
 
 
 @dataclass
@@ -100,10 +103,15 @@ class LLMProvider(ABC):
         messages: list[Message],
         tools: list[ToolSpec] | None = None,
         max_output_tokens: int | None = None,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         start = time.perf_counter()
         response = self._complete(
-            system, messages, tools or [], max_output_tokens or self.max_output_tokens
+            system,
+            messages,
+            tools or [],
+            max_output_tokens or self.max_output_tokens,
+            tool_choice=tool_choice,
         )
         response.latency_s = time.perf_counter() - start
         return response
@@ -115,5 +123,6 @@ class LLMProvider(ABC):
         messages: list[Message],
         tools: list[ToolSpec],
         max_output_tokens: int,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         """Provider call. latency_s is filled in by complete()."""

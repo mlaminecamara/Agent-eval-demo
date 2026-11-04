@@ -51,6 +51,44 @@ FORCE_FINAL_MESSAGE = (
 )
 
 
+# --- Plan-and-Execute: appended to the system prompt for each phase ---
+
+PLANNER_SUFFIX = """
+Mode planification
+- Ne réponds pas encore à la question. Si elle entre dans ton périmètre, appelle l'outil \
+submit_plan avec la liste minimale d'étapes (au plus {max_steps}). Chaque étape nomme un outil \
+(search_docs, get_deadline ou calculate_date) et ce qu'elle doit établir. Une étape qui \
+dépend du résultat d'une autre vient après elle.
+- Si la question sort de ton périmètre, n'appelle aucun outil et réponds par la phrase de \
+refus.
+"""
+
+EXECUTOR_SUFFIX = """
+Mode exécution
+Plan :
+{plan}
+Étape en cours : {index}/{total} — {goal}
+- Appelle maintenant l'outil nécessaire pour cette étape seulement, en t'appuyant sur les \
+résultats déjà obtenus (par exemple une date renvoyée par get_deadline). N'écris pas la \
+réponse finale.
+"""
+
+SYNTHESIS_SUFFIX = """
+Mode réponse
+- Les étapes du plan sont terminées. Rédige maintenant la réponse finale à la question \
+initiale à partir des résultats d'outils ci-dessus, en citant tes sources. N'appelle aucun \
+outil. Si les résultats ne suffisent pas, dis-le.
+"""
+
+# --- LangGraph agent: sent back to the model when its answer has unsupported dates ---
+
+VERIFY_MESSAGE = (
+    "Vérification automatique : ces dates de ta réponse ne figurent ni dans la question ni "
+    "dans aucun résultat d'outil : {dates}. Vérifie-les avec les outils (calculate_date pour "
+    "un calcul) ou corrige ta réponse, puis donne la réponse finale complète."
+)
+
+
 def build_system_prompt(today: date | None = None) -> str:
     return SYSTEM_PROMPT.format(
         today=(today or date.today()).isoformat(),

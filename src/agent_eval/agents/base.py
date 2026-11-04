@@ -10,7 +10,14 @@ from pathlib import Path
 from typing import Any, Literal
 
 from agent_eval.agents.prompts import is_refusal, leaks_system_prompt
-from agent_eval.llm.base import LLMProvider
+from agent_eval.llm.base import (
+    LLMProvider,
+    LLMResponse,
+    Message,
+    ToolCall,
+    ToolChoice,
+    ToolSpec,
+)
 from agent_eval.observability.cost import PricingTable
 from agent_eval.observability.tracing import Trace, TraceSink
 from agent_eval.tools.registry import ToolRegistry
@@ -109,6 +116,89 @@ class Agent(ABC):
 
     def new_trace(self, question: str, **metadata: Any) -> Trace:
         return Trace(self.sink, self.pricing, self.name, question, metadata=metadata)
+
+    # --- shared building blocks, so every agent is traced and measured the same way ---
+
+    def _truncate(self, content: str) -> str:
+        limit = self.config.max_tool_result_chars
+        if len(content) <= limit:
+            return content
+        return content[:limit] + "\n[... résultat tronqué ...]"
+
+    def _call_llm(
+        self,
+        system: str,
+        messages: list[Message],
+        tools: list[ToolSpec] | None,
+        step: int,
+        trace: Trace,
+        tool_choice: ToolChoice = "auto",
+    ) -> LLMResponse:
+        response = self.llm.complete(
+            system,
+            messages,
+            tools=tools,
+            max_output_tokens=self.config.max_output_tokens,
+            tool_choice=tool_choice,
+        )
+        trace.llm_call(step, response, price_model=self.llm.model)
+        return response
+
+    def _execute_tool_calls(
+        self, calls: list[ToolCall], step: int, trace: Trace, records: list[ToolCallRecord]
+    ) -> list[Message]:
+        """Run every tool call of one model turn; return the tool-result messages."""
+        out: list[Message] = []
+        for call in calls:
+            result = self.tools.execute(call)
+            trace.tool_call(step, call.arguments, result)
+            records.append(
+                ToolCallRecord(
+                    step=step,
+                    name=call.name,
+                    arguments=call.arguments,
+                    ok=result.ok,
+                    error_type=result.error_type,
+                    latency_s=result.latency_s,
+                    data=result.data,
+                )
+            )
+            out.append(
+                Message.tool_result(call.id, self._truncate(result.content), is_error=not result.ok)
+            )
+        return out
+
+    def _result(
+        self,
+        question: str,
+        trace: Trace,
+        answer: str,
+        stopped: StoppedReason,
+        steps: int,
+        records: list[ToolCallRecord],
+        latency: float,
+        error: str | None,
+        **extra: Any,
+    ) -> AgentResult:
+        trace.end(stopped, steps, latency, error=error, **extra)
+        return AgentResult(
+            agent=self.name,
+            question=question,
+            answer=answer,
+            stopped_reason=stopped,
+            steps=steps,
+            tool_calls=records,
+            llm_calls=trace.llm_calls,
+            input_tokens=trace.input_tokens,
+            output_tokens=trace.output_tokens,
+            cost_usd=trace.cost_usd,
+            latency_s=latency,
+            trace_id=trace.trace_id,
+            provider=self.llm.name,
+            model=self.llm.model,
+            error=error,
+            extra=extra,
+        )
 
     @abstractmethod
     def run(self, question: str, **metadata: Any) -> AgentResult:

@@ -197,6 +197,7 @@ def evaluate_case(
         "cost_usd": result.cost_usd,
         "latency_s": result.latency_s,
         "trace_id": result.trace_id,
+        "agent_extra": result.extra,  # e.g. the plan (plan_execute), verify outcome (langgraph)
         "facts": {
             "expected": facts.expected,
             "found": facts.found,

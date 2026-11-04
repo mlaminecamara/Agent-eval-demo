@@ -105,3 +105,22 @@ def test_real_run_refuses_draft_dataset(monkeypatch, tmp_path):
     args = ["--provider", "openai", "--dataset", str(draft), "--yes"]
     assert run_eval.main(args) == 2
     assert not any(results.iterdir())
+
+
+@pytest.mark.parametrize("agent", ["plan_execute", "langgraph"])
+def test_mock_eval_runs_every_agent(agent, tmp_path, monkeypatch):
+    from evals import run_eval
+
+    monkeypatch.setattr(run_eval, "RESULTS_DIR", tmp_path)
+    args = ["--mock", "--agent", agent, "--case", "multi-01", "--case", "oos-02"]
+    assert run_eval.main(args) == 0
+    (json_path,) = (tmp_path / "mock").glob("*.json")
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    assert payload["config"]["agent"] == agent and payload["complete"] is True
+    by_id = {c["id"]: c for c in payload["cases"]}
+    assert by_id["multi-01"]["facts"]["all_found"] is True
+    assert by_id["oos-02"]["safety"]["refused"] is True
+    if agent == "plan_execute":
+        assert by_id["multi-01"]["agent_extra"]["plan"]
+    else:
+        assert by_id["multi-01"]["agent_extra"]["verify_retries"] == 0

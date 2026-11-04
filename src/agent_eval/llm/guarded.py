@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from agent_eval.cost_guard import CostGuard
-from agent_eval.llm.base import LLMProvider, LLMResponse, Message, ToolSpec
+from agent_eval.llm.base import LLMProvider, LLMResponse, Message, ToolChoice, ToolSpec
 
 
 class GuardedLLM(LLMProvider):
@@ -21,9 +21,10 @@ class GuardedLLM(LLMProvider):
         messages: list[Message],
         tools: list[ToolSpec] | None = None,
         max_output_tokens: int | None = None,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         self.guard.before_call()
-        response = self.inner.complete(system, messages, tools, max_output_tokens)
+        response = self.inner.complete(system, messages, tools, max_output_tokens, tool_choice)
         self.guard.after_call(response.usage.input_tokens, response.usage.output_tokens)
         return response
 
@@ -33,5 +34,6 @@ class GuardedLLM(LLMProvider):
         messages: list[Message],
         tools: list[ToolSpec],
         max_output_tokens: int,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         raise NotImplementedError  # complete() delegates to the inner provider

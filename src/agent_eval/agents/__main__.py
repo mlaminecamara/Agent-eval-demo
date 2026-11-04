@@ -27,6 +27,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model")
     parser.add_argument("--json", action="store_true", help="print the full result as JSON")
     args = parser.parse_args(argv)
+    # Corpus passages contain characters (e.g. "➢") that cp1252 consoles cannot encode.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
 
     overrides: dict[str, object] = {}
     if args.provider:

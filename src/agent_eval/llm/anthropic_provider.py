@@ -20,6 +20,7 @@ from agent_eval.llm.base import (
     LLMResponse,
     Message,
     ToolCall,
+    ToolChoice,
     ToolSpec,
     Usage,
 )
@@ -99,6 +100,7 @@ class AnthropicProvider(LLMProvider):
         messages: list[Message],
         tools: list[ToolSpec],
         max_output_tokens: int,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         kwargs: dict[str, Any] = {
             "model": self.model,
@@ -108,7 +110,7 @@ class AnthropicProvider(LLMProvider):
         }
         if tools:
             kwargs["tools"] = self._to_anthropic_tools(tools)
-            kwargs["tool_choice"] = {"type": "auto"}
+            kwargs["tool_choice"] = {"type": tool_choice}
         if self.effort:
             kwargs["output_config"] = {"effort": self.effort}
 

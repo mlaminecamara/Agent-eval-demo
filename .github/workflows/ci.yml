@@ -48,4 +48,7 @@ jobs:
       - name: Ingest smoke test (mock embeddings into pgvector)
         run: uv run python -m agent_eval.ingest --chunk-size 500 --overlap 50
       - name: Eval smoke test (mock mode, full golden dataset)
-        run: uv run python -m evals.run_eval --mock
+        run: |
+          for agent in react plan_execute langgraph; do
+            uv run python -m evals.run_eval --mock --agent "$agent"
+          done

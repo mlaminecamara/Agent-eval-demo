@@ -14,7 +14,7 @@ from agent_eval.tools.registry import ToolRegistry, build_registry
 
 __all__ = ["Agent", "AgentConfig", "AgentResult", "build_agent"]
 
-AGENT_NAMES = ("react",)
+AGENT_NAMES = ("react", "plan_execute", "langgraph")
 
 
 def build_agent(
@@ -38,4 +38,12 @@ def build_agent(
         from agent_eval.agents.react_agent import ReActAgent
 
         return ReActAgent(llm, tools, pricing, config, trace_path)
+    if name == "plan_execute":
+        from agent_eval.agents.plan_execute_agent import PlanExecuteAgent
+
+        return PlanExecuteAgent(llm, tools, pricing, config, trace_path)
+    if name == "langgraph":
+        from agent_eval.agents.langgraph_agent import LangGraphAgent
+
+        return LangGraphAgent(llm, tools, pricing, config, trace_path)
     raise ValueError(f"Unknown agent {name!r}; available: {', '.join(AGENT_NAMES)}")

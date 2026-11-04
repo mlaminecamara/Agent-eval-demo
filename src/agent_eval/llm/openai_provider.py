@@ -11,6 +11,7 @@ from agent_eval.llm.base import (
     LLMResponse,
     Message,
     ToolCall,
+    ToolChoice,
     ToolSpec,
     Usage,
 )
@@ -81,6 +82,7 @@ class OpenAIProvider(LLMProvider):
         messages: list[Message],
         tools: list[ToolSpec],
         max_output_tokens: int,
+        tool_choice: ToolChoice = "auto",
     ) -> LLMResponse:
         kwargs: dict[str, Any] = {
             "model": self.model,
@@ -95,7 +97,7 @@ class OpenAIProvider(LLMProvider):
             kwargs["reasoning_effort"] = self.effort
         if tools:
             kwargs["tools"] = self._to_openai_tools(tools)
-            kwargs["tool_choice"] = "auto"
+            kwargs["tool_choice"] = tool_choice
 
         completion = self._client.chat.completions.create(**kwargs)
         choice = completion.choices[0]
