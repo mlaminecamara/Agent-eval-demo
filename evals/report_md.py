@@ -92,7 +92,13 @@ def render_run_markdown(payload: dict[str, Any]) -> str:
         f"(`{cfg['index_table']}`) |",
         f"| Chunking | {cfg['chunk_size']} tokens, overlap {cfg['chunk_overlap']} |",
         f"| Rerank | {cfg['reranker_model'] if cfg['rerank'] else 'off'} |",
-        f"| Judge | {cfg['judge_model'] or 'off'} |",
+        f"| Judge | {cfg['judge_model'] or 'off'}"
+        + (
+            f" (prompt sha256:{cfg['judge_prompt_sha256_16']})"
+            if cfg.get("judge_prompt_sha256_16")
+            else ""
+        )
+        + " |",
         f"| Dataset | `{ds['path']}` sha256:{ds['sha256_16']}, {ds['n_cases']} cases |",
         f"| Code | {cfg['git_commit'] or 'unknown'} |",
         f"| Created | {payload['created_at']} |",

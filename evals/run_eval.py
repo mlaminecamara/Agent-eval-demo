@@ -44,6 +44,7 @@ from agent_eval.retrieval.retriever import (
 )
 from agent_eval.tools.registry import ToolRegistry, build_registry
 from evals.dataset import Case, dataset_fingerprint, load_dataset, status_counts
+from evals.judge import PROMPT_PATH as JUDGE_PROMPT_PATH
 from evals.judge import Judge, MockJudge
 from evals.metrics.aggregate import summarize, summarize_by_category
 from evals.metrics.answer_quality import evaluate_facts
@@ -169,12 +170,12 @@ def evaluate_case(
             judge_out = judge.grade(
                 case,
                 result.answer,
-                result.retrieved,
+                result.tool_calls,
                 facts_ok=facts.all_found,
                 refusal_ok=safety.refusal_correct,
             )
         else:
-            judge_out = judge.grade(case, result.answer, result.retrieved)
+            judge_out = judge.grade(case, result.answer, result.tool_calls)
 
     return {
         "id": case.id,
@@ -427,6 +428,9 @@ def main(argv: list[str] | None = None) -> int:
             else None,
             "max_iterations": settings.agent.max_iterations,
             "judge_model": (judge.model if judge else None),
+            "judge_prompt_sha256_16": dataset_fingerprint(JUDGE_PROMPT_PATH)
+            if judge and not args.mock
+            else None,
             "git_commit": _git_commit(),
         },
         "dataset": {

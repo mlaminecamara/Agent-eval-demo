@@ -214,7 +214,27 @@ def test_judge_prompt_renders(monkeypatch):
     from evals.judge import render_prompt
 
     case = _case(expected_facts=[{"type": "date", "value": "2027-09-01", "description": "d"}])
-    text = render_prompt(case, "réponse", [{"doc_id": "faq-fe", "page_start": 6, "text": "t"}])
-    assert "2027-09-01" in text and "[faq-fe p.6] t" in text and "réponse" in text
+    search = SimpleNamespace(
+        name="search_docs",
+        ok=True,
+        arguments={"query": "q"},
+        data={"passages": [{"ref": "S1", "doc_id": "faq-fe", "page_start": 6, "text": "t"}]},
+    )
+    deadline = SimpleNamespace(
+        name="get_deadline",
+        ok=True,
+        arguments={},
+        data={
+            "entity_size": "PME",
+            "obligation": "emission",
+            "date": "2027-09-01",
+            "sources": [{"doc_id": "fiche-3", "page": 2, "section": "2"}],
+        },
+    )
+    failed = SimpleNamespace(name="calculate_date", ok=False, arguments={}, data={})
+    text = render_prompt(case, "réponse", [search, deadline, failed])
+    assert "2027-09-01" in text and "[search 1, S1 = faq-fe p.6] t" in text
+    assert "[get_deadline PME/emission] date 2027-09-01" in text and "fiche-3 p.2 §2" in text
+    assert "calculate_date" not in text and "réponse" in text
     assert "{question}" not in text
-    _ = SimpleNamespace  # keep import used
+    assert "(no tool output)" in render_prompt(case, "r", [])

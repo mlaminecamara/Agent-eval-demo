@@ -24,7 +24,9 @@ from agent_eval.observability.tracing import Trace, TraceSink
 from evals.dataset import Case
 
 PROMPT_PATH = Path(__file__).parent / "judge" / "judge_prompt.md"
-MAX_SOURCE_CHARS = 4000
+MAX_SOURCE_CHARS = 6000
+MAX_PASSAGES = 8
+MAX_PASSAGE_CHARS = 600
 
 
 def _fact_line(fact: Any) -> str:
@@ -32,14 +34,54 @@ def _fact_line(fact: Any) -> str:
     return f"- {fact.description or fact.type}: {value}"
 
 
-def render_prompt(case: Case, answer: str, sources: list[dict[str, Any]]) -> str:
+def _source_ref(s: dict[str, Any]) -> str:
+    page = s.get("page_start", s.get("page"))
+    return (
+        f"{s.get('doc_id')}"
+        + (f" p.{page}" if page else "")
+        + (f" §{s['section']}" if s.get("section") else "")
+    )
+
+
+def render_evidence(tool_calls: list[Any]) -> str:
+    """What the agent saw from its tools, labelled as the agent saw it: search passages keep
+    their ref (S1, S2... restarting at each search), get_deadline its cited sources,
+    calculate_date its result. Without this the judge marks tool-backed citations as invented."""
+    lines: list[str] = []
+    passages_left = MAX_PASSAGES
+    n_search = 0
+    for call in tool_calls:
+        if not call.ok:
+            continue
+        data = call.data
+        if call.name == "search_docs":
+            n_search += 1
+            for p in data.get("passages", [])[: max(passages_left, 0)]:
+                lines.append(
+                    f"[search {n_search}, {p.get('ref')} = {_source_ref(p)}] "
+                    f"{p.get('text', '')[:MAX_PASSAGE_CHARS]}"
+                )
+                passages_left -= 1
+        elif call.name == "get_deadline":
+            sources = "; ".join(_source_ref(s) for s in data.get("sources", []))
+            lines.append(
+                f"[get_deadline {data.get('entity_size')}/{data.get('obligation')}] "
+                f"date {data.get('date')} ({data.get('obligation_label')}); "
+                f"entity: {data.get('entity_definition')}; sources: {sources}"
+            )
+        else:
+            payload = {k: v for k, v in data.items() if k != "text"}
+            lines.append(
+                f"[{call.name} {json.dumps(call.arguments, ensure_ascii=False)}] "
+                f"{json.dumps(payload, ensure_ascii=False)}"
+            )
+    return "\n".join(lines)[:MAX_SOURCE_CHARS] or "(no tool output)"
+
+
+def render_prompt(case: Case, answer: str, tool_calls: list[Any]) -> str:
     template = PROMPT_PATH.read_text(encoding="utf-8")
     facts = "\n".join(_fact_line(f) for f in case.expected_facts) or "(none)"
-    src_lines = []
-    for s in sources[:8]:
-        page = f" p.{s.get('page_start')}" if s.get("page_start") else ""
-        src_lines.append(f"[{s.get('doc_id')}{page}] {s.get('text', '')[:600]}")
-    src = "\n".join(src_lines)[:MAX_SOURCE_CHARS] or "(no sources retrieved)"
+    src = render_evidence(tool_calls)
     return template.format(
         question=case.question,
         expected_answer=case.expected_answer,
@@ -87,8 +129,8 @@ class Judge:
         self.pricing = pricing
         self.sink = TraceSink(trace_path)
 
-    def grade(self, case: Case, answer: str, sources: list[dict[str, Any]]) -> dict[str, Any]:
-        prompt = render_prompt(case, answer, sources)
+    def grade(self, case: Case, answer: str, tool_calls: list[Any]) -> dict[str, Any]:
+        prompt = render_prompt(case, answer, tool_calls)
         trace = Trace(
             self.sink, self.pricing, "judge", case.question, metadata={"case_id": case.id}
         )
@@ -140,7 +182,7 @@ class MockJudge:
         self,
         case: Case,
         answer: str,
-        sources: list[dict[str, Any]],
+        tool_calls: list[Any],
         facts_ok: bool | None = None,
         refusal_ok: bool = True,
     ) -> dict[str, Any]:

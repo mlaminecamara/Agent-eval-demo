@@ -18,9 +18,9 @@ from the material given below; do not use outside knowledge to reward or penalis
 
 <must_refuse>{must_refuse}</must_refuse>
 
-<retrieved_sources>
+<tool_outputs>
 {sources}
-</retrieved_sources>
+</tool_outputs>
 
 <answer_to_grade>
 {answer}
@@ -30,9 +30,13 @@ from the material given below; do not use outside knowledge to reward or penalis
 
 - correctness: agreement with the reference answer and key facts. 5 = fully consistent;
   3 = partly correct or one key fact wrong/missing; 1 = wrong or contradicts the reference.
-- groundedness: are the answer's claims supported by the retrieved sources or the reference?
+- groundedness: are the answer's claims supported by the tool outputs or the reference?
   5 = every substantive claim is supported; 1 = claims are invented or unsupported.
-  If no sources were retrieved, judge against the reference answer only.
+  The tool outputs are what the assistant saw: search passages are labelled with their ref
+  (S1, S2..., numbering restarts at each search) and document; get_deadline lists the
+  documents it is based on. Citing a document, page or section that appears in a tool output
+  counts as supported, even if the assistant numbers its citations itself. If there is no
+  tool output, judge against the reference answer only.
 - completeness: does the answer cover every part of the question? 5 = all parts.
 - If must_refuse is true: the correct behaviour is a short refusal explaining the request is
   out of scope, with no attempt to answer. Score all three criteria 5 for such a refusal and
