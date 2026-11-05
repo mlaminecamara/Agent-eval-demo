@@ -6,17 +6,17 @@ Value = mean over cases of each case's outcome averaged over runs, [95% Wilson i
 
 | Configuration | Runs | LLM-judge pass | All key facts found | Expected tool calls made | Retrieval hit@5 (direct) | Correct refusal | False refusal | Injection resisted | System-prompt leak |
 |---|---|---|---|---|---|---|---|---|---|
-| langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 1 | 79% [62%–89%] | 81% [63%–92%] | 93% [77%–98%] | 89% [72%–96%] | 100% [61%–100%] | 0% [0%–12%] | 100% [57%–100%] | 0% [0%–10%] |
-| plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 1 | 79% [62%–89%] | 85% [68%–94%] | 93% [77%–98%] | 89% [72%–96%] | 100% [61%–100%] | 0% [0%–12%] | 100% [57%–100%] | 0% [0%–10%] |
-| react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank (baseline) | 1 | 79% [62%–89%] | 81% [63%–92%] | 89% [72%–96%] | 89% [72%–96%] | 83% [44%–97%] | 0% [0%–12%] | 100% [57%–100%] | 0% [0%–10%] |
+| langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 3 | 80% [63%–90%] runs 79%–82% | 85% [68%–94%] runs 81%–89% | 93% [77%–98%] | 89% [72%–96%] | 100% [61%–100%] | 0% [0%–12%] | 100% [57%–100%] | 0% [0%–10%] |
+| plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 3 | 79% [62%–89%] runs 76%–82% | 86% [69%–95%] runs 85%–89% | 95% [80%–99%] runs 93%–96% | 89% [72%–96%] | 100% [61%–100%] | 0% [0%–12%] | 100% [57%–100%] | 0% [0%–10%] |
+| react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank (baseline) | 3 | 79% [62%–89%] | 83% [65%–93%] runs 81%–85% | 88% [70%–95%] runs 85%–89% | 89% [72%–96%] | 89% [49%–99%] runs 83%–100% | 0% [0%–12%] | 93% [50%–100%] runs 80%–100% | 0% [0%–10%] |
 
 ## Latency and cost
 
 | Configuration | Requests | Latency p50 / p95 | Steps (mean) | Agent cost / request | Judge cost / request | Prices verified |
 |---|---|---|---|---|---|---|
-| langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 33 | 2.6 s / 4.0 s | 2.2 | $0.0034 | $0.0003 | no |
-| plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 33 | 4.6 s / 8.1 s | 4.0 | $0.0065 | $0.0003 | no |
-| react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 33 | 2.0 s / 4.5 s | 2.3 | $0.0039 | $0.0003 | no |
+| langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 99 | 2.6 s / 4.2 s | 2.2 | $0.0033 | $0.0003 | no |
+| plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 99 | 5.4 s / 8.4 s | 4.1 | $0.0071 | $0.0004 | no |
+| react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | 99 | 2.4 s / 4.9 s | 2.2 | $0.0036 | $0.0003 | no |
 
 ## Difference with the baseline (react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank)
 
@@ -24,14 +24,20 @@ Paired bootstrap over the cases both configurations ran, in percentage points. `
 
 | Configuration | LLM-judge pass | All key facts found | Expected tool calls made | Correct refusal |
 |---|---|---|---|---|
-| langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | +0 pts [-15, +15] | +0 pts [-15, +15] | +4 pts [+0, +11] | +17 pts [+0, +50] |
-| plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | +0 pts [-12, +12] | +4 pts [-7, +15] | +4 pts [+0, +11] | +17 pts [+0, +50] |
+| langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | +1 pts [-6, +8] | +2 pts [-5, +10] | +5 pts [+0, +14] | +11 pts [+0, +22] |
+| plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank | -0 pts [-8, +8] | +4 pts [-6, +15] | +7 pts [+0, +17] | +11 pts [+0, +22] |
+
+## Run-to-run stability
+
+- langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: 10 cases changed judge outcome between runs
+- plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: 7 cases changed judge outcome between runs
+- react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: 7 cases changed judge outcome between runs
 
 ## Runs
 
-- langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: `20261105-081812_langgraph_gpt-5.4-mini-2026-03-17_c500o50`
-- plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: `20261105-081303_plan_execute_gpt-5.4-mini-2026-03-17_c500o50`
-- react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: `20261104-222137_react_gpt-5.4-mini-2026-03-17_c500o50`
+- langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: `20261105-081812_langgraph_gpt-5.4-mini-2026-03-17_c500o50`, `20261105-151056_langgraph_gpt-5.4-mini-2026-03-17_c500o50`, `20261105-151345_langgraph_gpt-5.4-mini-2026-03-17_c500o50`
+- plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: `20261105-081303_plan_execute_gpt-5.4-mini-2026-03-17_c500o50`, `20261105-150152_plan_execute_gpt-5.4-mini-2026-03-17_c500o50`, `20261105-150631_plan_execute_gpt-5.4-mini-2026-03-17_c500o50`
+- react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank: `20261104-222137_react_gpt-5.4-mini-2026-03-17_c500o50`, `20261105-145529_react_gpt-5.4-mini-2026-03-17_c500o50`, `20261105-145855_react_gpt-5.4-mini-2026-03-17_c500o50`
 
 ## Excluded runs
 
