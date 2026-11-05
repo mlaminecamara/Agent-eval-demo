@@ -1,0 +1,19 @@
+# Secrets: never in the image (pass them with --env-file / -e at run time).
+.env
+.env.*
+
+# Not needed by the API
+.git
+.github
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+**/__pycache__
+runs
+evals
+tests
+scripts
+docker-compose.yml
+Makefile
+data/corpus/.cache

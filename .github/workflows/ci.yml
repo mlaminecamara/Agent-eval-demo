@@ -52,3 +52,30 @@ jobs:
           for agent in react plan_execute langgraph; do
             uv run python -m evals.run_eval --mock --agent "$agent"
           done
+      - name: Compare smoke test (mock runs)
+        run: uv run python -m evals.compare --mock
+
+  docker:
+    # Builds the API image and checks that it answers offline (mock LLM, in-memory index).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build -t agent-eval-demo .
+      - name: Run and query
+        run: |
+          docker run -d --name api -p 8000:8000 \
+            -e LLM_PROVIDER=mock -e EMBEDDING_PROVIDER=mock -e VECTOR_STORE=memory \
+            agent-eval-demo
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8000/health && break
+            sleep 2
+          done
+          curl -fsS -X POST http://localhost:8000/ask \
+            -H 'Content-Type: application/json' \
+            -d '{"question": "Quand une PME doit-elle émettre des factures électroniques ?"}' \
+            | tee answer.json
+          python3 -c "import json; b = json.load(open('answer.json')); assert b['answer'] and b['sources'], b"
+      - name: Logs on failure
+        if: failure()
+        run: docker logs api || true

@@ -1,0 +1,27 @@
+# Experiment matrix for `make matrix` (python -m evals.run_matrix).
+# Each config is run `repeats` times on the full golden dataset. Comparable runs already in
+# evals/results/ (same configuration, dataset version and judge prompt) count towards the
+# repeats unless --no-reuse is passed. Fields: name, agent, provider, model, chunk_size,
+# chunk_overlap, rerank, repeats. Omitted fields take the values from config.yaml.
+repeats: 3
+configs:
+  # Agent architectures, same model and retrieval.
+  - name: react-openai
+    agent: react
+    provider: openai
+  - name: plan_execute-openai
+    agent: plan_execute
+    provider: openai
+  - name: langgraph-openai
+    agent: langgraph
+    provider: openai
+  # Retrieval: local cross-encoder reranker (needs `uv sync --extra rerank`).
+  - name: react-openai-rerank
+    agent: react
+    provider: openai
+    rerank: true
+  # Model: same agent on Claude Sonnet (prices in config/pricing.yaml are not verified).
+  - name: react-anthropic
+    agent: react
+    provider: anthropic
+    repeats: 1

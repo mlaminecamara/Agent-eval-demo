@@ -1,0 +1,420 @@
+{
+  "mock": false,
+  "entries": [
+    {
+      "label": "langgraph · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank",
+      "config": {
+        "agent": "langgraph",
+        "chunk_overlap": 50,
+        "chunk_size": 500,
+        "embedding_model": "text-embedding-3-small",
+        "index_table": "chunks_text_embedding_3_small_c500_o50",
+        "judge_model": "claude-haiku-5-5",
+        "judge_prompt_sha256_16": "12aec3de208085ff",
+        "llm_model": "gpt-5.4-mini-2026-03-17",
+        "llm_provider": "openai",
+        "max_iterations": 6,
+        "rerank": false,
+        "reranker_model": null,
+        "store": "pgvector",
+        "top_k": 5
+      },
+      "runs": [
+        "20261105-081812_langgraph_gpt-5.4-mini-2026-03-17_c500o50"
+      ],
+      "n_runs": 1,
+      "prices_verified": false,
+      "is_baseline": false,
+      "metrics": {
+        "judge_pass": {
+          "value": 0.7878787878787878,
+          "ci_low": 0.6224802241287064,
+          "ci_high": 0.8932411343356381,
+          "n_cases": 33,
+          "n_observations": 33,
+          "per_run_min": 0.7878787878787878,
+          "per_run_max": 0.7878787878787878,
+          "unstable_cases": null
+        },
+        "facts_all_found": {
+          "value": 0.8148148148148148,
+          "ci_low": 0.6330094349480825,
+          "ci_high": 0.9181941342571468,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8148148148148148,
+          "per_run_max": 0.8148148148148148,
+          "unstable_cases": null
+        },
+        "tools_all_matched": {
+          "value": 0.9259259259259259,
+          "ci_low": 0.7663002270926937,
+          "ci_high": 0.9794457783026165,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.9259259259259259,
+          "per_run_max": 0.9259259259259259,
+          "unstable_cases": null
+        },
+        "hit_at_5_direct": {
+          "value": 0.8888888888888888,
+          "ci_low": 0.7194181745602705,
+          "ci_high": 0.9614803521050127,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8888888888888888,
+          "per_run_max": 0.8888888888888888,
+          "unstable_cases": null
+        },
+        "correct_refusal": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n_cases": 6,
+          "n_observations": 6,
+          "per_run_min": 1.0,
+          "per_run_max": 1.0,
+          "unstable_cases": null
+        },
+        "false_refusal": {
+          "value": 0.0,
+          "ci_low": 6.938893903907228e-18,
+          "ci_high": 0.12455903714463581,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.0,
+          "per_run_max": 0.0,
+          "unstable_cases": null
+        },
+        "injection_resisted": {
+          "value": 1.0,
+          "ci_low": 0.5655085052479191,
+          "ci_high": 1.0,
+          "n_cases": 5,
+          "n_observations": 5,
+          "per_run_min": 1.0,
+          "per_run_max": 1.0,
+          "unstable_cases": null
+        },
+        "system_prompt_leak": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.10427343003561192,
+          "n_cases": 33,
+          "n_observations": 33,
+          "per_run_min": 0.0,
+          "per_run_max": 0.0,
+          "unstable_cases": null
+        }
+      },
+      "performance": {
+        "n_requests": 33,
+        "latency_p50_s": 2.569005500000003,
+        "latency_p95_s": 4.02693608000004,
+        "steps_mean": 2.1818181818181817,
+        "agent_cost_per_request": 0.0034031136363636364,
+        "judge_cost_per_request": 0.0003198515151515152,
+        "agent_cost_total": 0.11230274999999999
+      },
+      "delta_vs_baseline": {
+        "judge_pass": {
+          "delta": 0.0,
+          "ci_low": -0.15151515151515152,
+          "ci_high": 0.15151515151515152,
+          "n_cases": 33,
+          "significant": false
+        },
+        "facts_all_found": {
+          "delta": 0.0,
+          "ci_low": -0.14814814814814814,
+          "ci_high": 0.14814814814814814,
+          "n_cases": 27,
+          "significant": false
+        },
+        "tools_all_matched": {
+          "delta": 0.037037037037037035,
+          "ci_low": 0.0,
+          "ci_high": 0.1111111111111111,
+          "n_cases": 27,
+          "significant": false
+        },
+        "correct_refusal": {
+          "delta": 0.16666666666666666,
+          "ci_low": 0.0,
+          "ci_high": 0.5,
+          "n_cases": 6,
+          "significant": false
+        }
+      }
+    },
+    {
+      "label": "plan_execute · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank",
+      "config": {
+        "agent": "plan_execute",
+        "chunk_overlap": 50,
+        "chunk_size": 500,
+        "embedding_model": "text-embedding-3-small",
+        "index_table": "chunks_text_embedding_3_small_c500_o50",
+        "judge_model": "claude-haiku-5-5",
+        "judge_prompt_sha256_16": "12aec3de208085ff",
+        "llm_model": "gpt-5.4-mini-2026-03-17",
+        "llm_provider": "openai",
+        "max_iterations": 6,
+        "rerank": false,
+        "reranker_model": null,
+        "store": "pgvector",
+        "top_k": 5
+      },
+      "runs": [
+        "20261105-081303_plan_execute_gpt-5.4-mini-2026-03-17_c500o50"
+      ],
+      "n_runs": 1,
+      "prices_verified": false,
+      "is_baseline": false,
+      "metrics": {
+        "judge_pass": {
+          "value": 0.7878787878787878,
+          "ci_low": 0.6224802241287064,
+          "ci_high": 0.8932411343356381,
+          "n_cases": 33,
+          "n_observations": 33,
+          "per_run_min": 0.7878787878787878,
+          "per_run_max": 0.7878787878787878,
+          "unstable_cases": null
+        },
+        "facts_all_found": {
+          "value": 0.8518518518518519,
+          "ci_low": 0.6752093665317052,
+          "ci_high": 0.9408416814035512,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8518518518518519,
+          "per_run_max": 0.8518518518518519,
+          "unstable_cases": null
+        },
+        "tools_all_matched": {
+          "value": 0.9259259259259259,
+          "ci_low": 0.7663002270926937,
+          "ci_high": 0.9794457783026165,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.9259259259259259,
+          "per_run_max": 0.9259259259259259,
+          "unstable_cases": null
+        },
+        "hit_at_5_direct": {
+          "value": 0.8888888888888888,
+          "ci_low": 0.7194181745602705,
+          "ci_high": 0.9614803521050127,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8888888888888888,
+          "per_run_max": 0.8888888888888888,
+          "unstable_cases": null
+        },
+        "correct_refusal": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n_cases": 6,
+          "n_observations": 6,
+          "per_run_min": 1.0,
+          "per_run_max": 1.0,
+          "unstable_cases": null
+        },
+        "false_refusal": {
+          "value": 0.0,
+          "ci_low": 6.938893903907228e-18,
+          "ci_high": 0.12455903714463581,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.0,
+          "per_run_max": 0.0,
+          "unstable_cases": null
+        },
+        "injection_resisted": {
+          "value": 1.0,
+          "ci_low": 0.5655085052479191,
+          "ci_high": 1.0,
+          "n_cases": 5,
+          "n_observations": 5,
+          "per_run_min": 1.0,
+          "per_run_max": 1.0,
+          "unstable_cases": null
+        },
+        "system_prompt_leak": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.10427343003561192,
+          "n_cases": 33,
+          "n_observations": 33,
+          "per_run_min": 0.0,
+          "per_run_max": 0.0,
+          "unstable_cases": null
+        }
+      },
+      "performance": {
+        "n_requests": 33,
+        "latency_p50_s": 4.5921869000000015,
+        "latency_p95_s": 8.066763620000051,
+        "steps_mean": 4.03030303030303,
+        "agent_cost_per_request": 0.0064592727272727276,
+        "judge_cost_per_request": 0.00034520909090909093,
+        "agent_cost_total": 0.213156
+      },
+      "delta_vs_baseline": {
+        "judge_pass": {
+          "delta": 0.0,
+          "ci_low": -0.12121212121212122,
+          "ci_high": 0.12121212121212122,
+          "n_cases": 33,
+          "significant": false
+        },
+        "facts_all_found": {
+          "delta": 0.037037037037037035,
+          "ci_low": -0.07407407407407407,
+          "ci_high": 0.14814814814814814,
+          "n_cases": 27,
+          "significant": false
+        },
+        "tools_all_matched": {
+          "delta": 0.037037037037037035,
+          "ci_low": 0.0,
+          "ci_high": 0.1111111111111111,
+          "n_cases": 27,
+          "significant": false
+        },
+        "correct_refusal": {
+          "delta": 0.16666666666666666,
+          "ci_low": 0.0,
+          "ci_high": 0.5,
+          "n_cases": 6,
+          "significant": false
+        }
+      }
+    },
+    {
+      "label": "react · gpt-5.4-mini-2026-03-17 · c500/o50 · no rerank",
+      "config": {
+        "agent": "react",
+        "chunk_overlap": 50,
+        "chunk_size": 500,
+        "embedding_model": "text-embedding-3-small",
+        "index_table": "chunks_text_embedding_3_small_c500_o50",
+        "judge_model": "claude-haiku-5-5",
+        "judge_prompt_sha256_16": "12aec3de208085ff",
+        "llm_model": "gpt-5.4-mini-2026-03-17",
+        "llm_provider": "openai",
+        "max_iterations": 6,
+        "rerank": false,
+        "reranker_model": null,
+        "store": "pgvector",
+        "top_k": 5
+      },
+      "runs": [
+        "20261104-222137_react_gpt-5.4-mini-2026-03-17_c500o50"
+      ],
+      "n_runs": 1,
+      "prices_verified": false,
+      "is_baseline": true,
+      "metrics": {
+        "judge_pass": {
+          "value": 0.7878787878787878,
+          "ci_low": 0.6224802241287064,
+          "ci_high": 0.8932411343356381,
+          "n_cases": 33,
+          "n_observations": 33,
+          "per_run_min": 0.7878787878787878,
+          "per_run_max": 0.7878787878787878,
+          "unstable_cases": null
+        },
+        "facts_all_found": {
+          "value": 0.8148148148148148,
+          "ci_low": 0.6330094349480825,
+          "ci_high": 0.9181941342571468,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8148148148148148,
+          "per_run_max": 0.8148148148148148,
+          "unstable_cases": null
+        },
+        "tools_all_matched": {
+          "value": 0.8888888888888888,
+          "ci_low": 0.7194181745602705,
+          "ci_high": 0.9614803521050127,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8888888888888888,
+          "per_run_max": 0.8888888888888888,
+          "unstable_cases": null
+        },
+        "hit_at_5_direct": {
+          "value": 0.8888888888888888,
+          "ci_low": 0.7194181745602705,
+          "ci_high": 0.9614803521050127,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.8888888888888888,
+          "per_run_max": 0.8888888888888888,
+          "unstable_cases": null
+        },
+        "correct_refusal": {
+          "value": 0.8333333333333334,
+          "ci_low": 0.43649056343635395,
+          "ci_high": 0.9699474141282697,
+          "n_cases": 6,
+          "n_observations": 6,
+          "per_run_min": 0.8333333333333334,
+          "per_run_max": 0.8333333333333334,
+          "unstable_cases": null
+        },
+        "false_refusal": {
+          "value": 0.0,
+          "ci_low": 6.938893903907228e-18,
+          "ci_high": 0.12455903714463581,
+          "n_cases": 27,
+          "n_observations": 27,
+          "per_run_min": 0.0,
+          "per_run_max": 0.0,
+          "unstable_cases": null
+        },
+        "injection_resisted": {
+          "value": 1.0,
+          "ci_low": 0.5655085052479191,
+          "ci_high": 1.0,
+          "n_cases": 5,
+          "n_observations": 5,
+          "per_run_min": 1.0,
+          "per_run_max": 1.0,
+          "unstable_cases": null
+        },
+        "system_prompt_leak": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.10427343003561192,
+          "n_cases": 33,
+          "n_observations": 33,
+          "per_run_min": 0.0,
+          "per_run_max": 0.0,
+          "unstable_cases": null
+        }
+      },
+      "performance": {
+        "n_requests": 33,
+        "latency_p50_s": 2.032800599999973,
+        "latency_p95_s": 4.478816479999839,
+        "steps_mean": 2.3333333333333335,
+        "agent_cost_per_request": 0.003947568181818182,
+        "judge_cost_per_request": 0.00033224545454545455,
+        "agent_cost_total": 0.13026975
+      },
+      "delta_vs_baseline": null
+    }
+  ],
+  "excluded": [
+    {
+      "run_id": "20261104-220031_react_gpt-5.4-mini-2026-03-17_c500o50",
+      "reason": "graded with another judge prompt version"
+    }
+  ]
+}

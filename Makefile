@@ -1,8 +1,9 @@
-.PHONY: help install up down ingest test test-integration lint typecheck eval eval-mock compare report serve
+.PHONY: help install up down ingest test test-integration lint typecheck eval eval-mock compare report matrix serve docker-build
 
 UV ?= uv
 CHUNK ?= 500
 OVERLAP ?= 50
+PORT ?= 8000
 
 help:
 	@echo "install    install dependencies (uv sync)"
@@ -13,9 +14,11 @@ help:
 	@echo "lint       ruff + mypy"
 	@echo "eval       real evaluation run (asks for cost confirmation; ARGS=...)"
 	@echo "eval-mock  offline evaluation run with fake LLM/embeddings/judge"
-	@echo "compare    compare result files into evals/results/summary.md [milestone 7]"
-	@echo "report     inject the generated tables into README.md        [milestone 7]"
-	@echo "serve      run the FastAPI app                               [milestone 7]"
+	@echo "matrix     run configurations x repeats (one cost confirmation; ARGS=...)"
+	@echo "compare    aggregate result files into evals/results/comparison.md"
+	@echo "report     compare, then rewrite the README results section"
+	@echo "serve      run the FastAPI app (POST /ask) on PORT=8000"
+	@echo "docker-build  build the API image"
 
 install:
 	$(UV) sync
@@ -51,5 +54,20 @@ eval:
 eval-mock:
 	$(UV) run python -m evals.run_eval --mock $(ARGS)
 
-compare report serve:
-	@echo "'make $@' is not implemented yet (see the milestone noted in 'make help')." && exit 1
+# Aggregate the runs in evals/results/ by configuration -> evals/results/comparison.md
+compare:
+	$(UV) run python -m evals.compare $(ARGS)
+
+# compare, then rewrite the README results section from comparison.md
+report: compare
+	$(UV) run python -m evals.report
+
+# Run a matrix of configurations x repeats (one cost confirmation for the whole matrix)
+matrix:
+	$(UV) run python -m evals.run_matrix $(ARGS)
+
+serve:
+	$(UV) run uvicorn agent_eval.api:app --host 0.0.0.0 --port $(PORT)
+
+docker-build:
+	docker build -t agent-eval-demo .

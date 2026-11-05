@@ -26,22 +26,12 @@ from typing import Any
 
 from agent_eval.agents import AGENT_NAMES, build_agent
 from agent_eval.agents.base import AgentConfig, AgentResult
-from agent_eval.config import PROJECT_ROOT, Settings, load_settings
+from agent_eval.config import PROJECT_ROOT, load_settings
 from agent_eval.cost_guard import BudgetExceeded, CostGuard, confirm_run, estimate_cost
-from agent_eval.embeddings import build_embedder
-from agent_eval.ingest.chunker import chunk_documents
-from agent_eval.ingest.indexer import index_chunks
-from agent_eval.ingest.loader import load_manifest
 from agent_eval.observability.cost import PricingTable
 from agent_eval.observability.logging import configure_logging
-from agent_eval.retrieval.base import VectorStore
-from agent_eval.retrieval.memory_store import MemoryStore
-from agent_eval.retrieval.retriever import (
-    Retriever,
-    build_reranker,
-    build_store,
-    index_spec,
-)
+from agent_eval.retrieval.index import build_index
+from agent_eval.retrieval.retriever import Retriever, build_reranker
 from agent_eval.tools.registry import ToolRegistry, build_registry
 from evals.dataset import Case, dataset_fingerprint, load_dataset, status_counts
 from evals.judge import PROMPT_PATH as JUDGE_PROMPT_PATH
@@ -93,37 +83,6 @@ def _git_commit() -> str | None:
         return f"{sha}-dirty" if sha and dirty.stdout.strip() else sha
     except (OSError, subprocess.SubprocessError):
         return None
-
-
-def _manifests(settings: Settings) -> list[Path]:
-    paths = [settings.resolve_path(settings.corpus.manifest)]
-    adv = settings.resolve_path(settings.corpus.adversarial_dir) / "manifest.yaml"
-    if adv.exists():
-        paths.append(adv)
-    return paths
-
-
-def build_index(settings: Settings, needs_adversarial: bool) -> tuple[VectorStore, Any]:
-    """Memory store: index in-process. pgvector: use the existing index (make ingest)."""
-    embedder = build_embedder(settings.embeddings)
-    if settings.retrieval.store == "memory":
-        store: VectorStore = MemoryStore(index_spec(settings))
-        docs = [d for m in _manifests(settings) for d in load_manifest(m)]
-        chunks = chunk_documents(
-            docs, settings.retrieval.chunk_size, settings.retrieval.chunk_overlap
-        )
-        index_chunks(chunks, store, embedder)
-        return store, embedder
-    store = build_store(settings)
-    n_corpus = store.count(["corpus"])
-    n_adv = store.count(["adversarial"])
-    if n_corpus == 0 or (needs_adversarial and n_adv == 0):
-        raise SystemExit(
-            f"Index {store.spec.table_name} has {n_corpus} corpus / {n_adv} adversarial chunks. "
-            f"Run: make ingest CHUNK={settings.retrieval.chunk_size} "
-            f"OVERLAP={settings.retrieval.chunk_overlap}"
-        )
-    return store, embedder
 
 
 def evaluate_case(
